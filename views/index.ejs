@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+      <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        var socket = io.connect('http://localhost:8080');
+        socket.on('welcome', function (data) {
+          console.log(data.hello);
+          socket.emit('checkout', { action: 'data' });
+        });
+    </script>
+  </head>
+  <body>
+    <h1><%= title %></h1>
+
+    <div id="status-sender">
+        <div>Send Message</div>
+        <input type="text" />
+    </div>
+    <div id="status-receiver">
+        <div>Recieved Message</div>
+        <input type="text"  />
+    </div>
+  </body>
+</html>
