@@ -12,7 +12,7 @@ var path = require('path');
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+//app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(express.favicon());
@@ -30,15 +30,25 @@ if ('development' == app.get('env')) {
 var server = require('http').createServer(app),
     io = require('socket.io').listen(server);
 
+server.listen(8080);
+
 app.get('/', routes.index);
 app.get('/users', user.list);
 
 io.sockets.on('connection', function (socket) {
-    console.log(socket);
+    socket.on('login', function(user) {
+        socket.emit('confirmLogin', {message: 'You have successfully connected.'});
+        socket.broadcast.emit('newUser', { name: user.name });
+    });
 
-    socket.emit('welcome', { hello: 'world' });
     socket.on('checkout', function (data) {
-        console.log(data);
+        console.log('checkout: ', data);
+        socket.broadcast.emit('checkout', data);
+    });
+
+    socket.on('checkin', function (data) {
+        console.log('checkin: ', data);
+        socket.broadcast.emit('checkin', data);
     });
 });
 

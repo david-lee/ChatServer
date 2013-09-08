@@ -2,27 +2,61 @@
 <html>
   <head>
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-      <script src="/socket.io/socket.io.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 
-    <script>
-        var socket = io.connect('http://localhost:8080');
-        socket.on('welcome', function (data) {
-          console.log(data.hello);
-          socket.emit('checkout', { action: 'data' });
-        });
-    </script>
+        <script>
+            jQuery(function(){
+                var $rcvMsg = $('#received-messages'),
+                    $input = $('#message');
+
+                var socket = io.connect('http://localhost:8080');
+
+                socket.on('confirmLogin', function(data) {
+                  $rcvMsg.append(data.message);
+                });
+
+                socket.on('newUser', function(user) {
+                    $('<div></div>').html(user.name+" has connected.").appendTo($rcvMsg);
+                });
+
+                socket.on('checkout', function(data) {
+                    $('<div></div>').html(data.name + " has checked out " + data.fid).appendTo($rcvMsg);
+                });
+
+                socket.on('checkin', function(data) {
+                    $('<div></div>').html(data.name + " has checked in " + data.fid).appendTo($rcvMsg);
+                });
+
+                $('#login').click(function(e) {
+                    console.log('login: ', $input.val());
+                    socket.emit('login', {name:$input.val()});
+                });
+
+                $('#checkout').click(function(e) {
+                    console.log('checkout: ', $input.val());
+                    socket.emit('checkout', {name:$input.val(), fid: _.uniqueId()});
+                });
+
+                $('#checkin').click(function(e) {
+                    console.log('checkin: ', $input.val());
+                    socket.emit('checkin', {name:$input.val(), fid: _.uniqueId()});
+                });
+
+            });
+      </script>
   </head>
   <body>
-    <h1><%= title %></h1>
+    <h1>Vena RTN</h1>
 
-    <div id="status-sender">
-        <div>Send Message</div>
-        <input type="text" />
+    <div id="send-message">
+        <div>Message</div>
+        <input id="message" type="text" />
+        <button id="login">Login</button> <button id="checkout">Check Out</button> <button id="checkin">Check In</button>
     </div>
-    <div id="status-receiver">
-        <div>Recieved Message</div>
-        <input type="text"  />
+
+    <div id="received-messages">
     </div>
   </body>
 </html>
